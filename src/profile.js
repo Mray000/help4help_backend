@@ -10,9 +10,9 @@ router.get("/:id", async (req, res) => {
     else {
       if (user.reviews.length) {
         let review_ids = user.reviews.map((r) => r.id);
-        let users_review = (
-          await User.find({ _id: { $in: review_ids } })
-        ).sort((u) => u._id.toString());
+        let users_review = (await User.find({ _id: { $in: review_ids } })).sort(
+          (u) => u._id.toString()
+        );
 
         user.reviews
           .sort((r) => r.id)
@@ -53,7 +53,6 @@ router.put("/photo", async (req, res) => {
 
 router.post("/review", async (req, res) => {
   res.send("Ok!");
-  console.log(req.body.review);
   await User.findByIdAndUpdate(req.body.to, {
     $push: { reviews: { id: req.id, review: req.body.review } },
   });

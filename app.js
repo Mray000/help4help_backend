@@ -23,7 +23,6 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, { cors: { origin: "http://localhost:3000" } });
-
 const PORT = process.env.PORT || 3010;
 
 const corsOptions = {
@@ -230,6 +229,7 @@ app.use(bodyParser.text());
 app.use("/disconnect", async (req, res, next) => {
   //получение id
   let id = JSON.parse(req.body).id;
+  console.log(id);
   if (id) {
     //удаление из коннектов
     delete connections[id];
@@ -237,7 +237,6 @@ app.use("/disconnect", async (req, res, next) => {
     let user = await User.findById(id);
     //получение даты
     let date = moment().format("MMMM D YYYY HH:mm");
-
     for (let c_r of user.chat_rooms) {
       let to = c_r.user_id;
       if (connections[to])
@@ -268,11 +267,9 @@ app.use("/profile/", profile);
 app.use("/users", users);
 await mongoose
   .connect(
-    // "mongodb+srv://aynur:qazplm123456@cluster0.wvmam.mongodb.net/Help4Help?retryWrites=true&w=majority",
     "mongodb://127.0.0.1:27017/?compressors=zlib&gssapiServiceName=mongodb",
     { useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true }
   )
-  // .then(async () =>User)
   .catch(console.log);
 
 server.listen(PORT, () => console.log("Start..."));

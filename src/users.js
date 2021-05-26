@@ -1,5 +1,6 @@
 import express from "express";
 import User from "./models/User.js";
+import moment from "moment";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
@@ -7,19 +8,36 @@ router.post("/", async (req, res) => {
   let to_learn = user.subjects.to_learn;
   let to_teach = user.subjects.to_teach;
   let users = await User.find({});
-  let suitable_users = users
-    .filter(
-      (u) =>
-        to_learn.filter((s) => u.subjects.to_teach.includes(s)).length ||
-        to_teach.filter((s) => u.subjects.to_learn.includes(s)).length
-    )
-    .sort((u) =>
-      to_learn.filter((s) => u.subjects.to_teach.includes(s)).length &&
-      to_teach.filter((s) => u.subjects.to_learn.includes(s)).length
-        ? -1
-        : 1
-    );
-
+  let filter = req.body.filter;
+  let suitable_users = filter.smart
+    ? users
+        .filter(
+          (u) =>
+            to_learn.filter((s) => u.subjects.to_teach.includes(s)).length ||
+            to_teach.filter((s) => u.subjects.to_learn.includes(s)).length
+        )
+        .sort((u) =>
+          to_learn.filter((s) => u.subjects.to_teach.includes(s)).length &&
+          to_teach.filter((s) => u.subjects.to_learn.includes(s)).length
+            ? -1
+            : 1
+        )
+        .filter(
+          (u) =>
+            (u.name + " " + u.surname)
+              .toLowerCase()
+              .includes(filter.fullname.toLowerCase()) &&
+            u.country.toLowerCase().includes(filter.country.toLowerCase()) &&
+            Number(moment().diff(moment(u.birthday), "years")) >= filter.age
+        )
+    : users.filter(
+        (u) =>
+          (u.name + " " + u.surname)
+            .toLowerCase()
+            .includes(filter.fullname.toLowerCase()) &&
+          u.country.toLowerCase().includes(filter.country.toLowerCase()) &&
+          Number(moment().diff(moment(u.birthday), "years")) >= filter.age
+      );
   res.json(
     suitable_users.map((u) => ({
       id: u._id,

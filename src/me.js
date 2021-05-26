@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.get("/", async (req, res, next) => {
   let date = jwt.decode(req.headers.autorisation);
-  console.log(date);
   let user = await User.findOne({ email: date?.email });
   if (user && user.password == date?.password)
     res.json({
